@@ -1,12 +1,13 @@
 from concurrent.futures import ThreadPoolExecutor
 import requests
 from requests import adapters as adapters
+from itertools import compress
 import time
 import json
 import re
 
 from bs4 import BeautifulSoup
-
+from verify_email import verify_email
 
 THREAD_POOL = 16
 
@@ -39,6 +40,12 @@ class PageContentManyURLs:
         """
         soup = BeautifulSoup(page_content, 'html.parser')
         emails = re.findall(r'[a-zA-Z\.-]+@[a-zA-Z\.-]+[a-zA-Z\.-]', soup.text)
+        if len(emails) > 1:
+            mask = verify_email(emails)
+            emails = list(compress(emails, mask))
+        if len(emails) == 1:
+            mask = verify_email(emails)
+            emails = list(compress(emails, [mask]))
         return emails
 
     @staticmethod

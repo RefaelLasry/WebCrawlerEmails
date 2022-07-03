@@ -65,7 +65,7 @@ def filter_result(res):
     res = res[mask]
     res = res.sort_values(by='importance', ascending=False)
     res = res[0:5]
-    res = res[0:5]
+    res = res.reset_index(drop=True)
     return res
 
 
