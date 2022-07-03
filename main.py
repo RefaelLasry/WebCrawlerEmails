@@ -2,8 +2,11 @@ from webcrawler import WebCrawler
 from graphanalyzer import *
 
 list_url = ["https://stat.huji.ac.il"]
+# list_url = ["https://www.accenture.com"]
 # list_url = ['https://main.knesset.gov.il/Pages/default.aspx', 'https://www.idi.org.il']
-depth = 2
+# list_url = ['https://main.knesset.gov.il/Pages/default.aspx']
+
+depth = 3
 
 
 def manager():

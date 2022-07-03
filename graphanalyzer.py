@@ -50,8 +50,6 @@ def compute_importance_with_page_rank(graph: nx.DiGraph):
     page_rank_result = nx.pagerank(graph)
     res = pd.DataFrame(index=page_rank_result.keys(), data=page_rank_result.values(), columns=['importance'])
     res.index.name = 'url'
-    res = res.sort_values(by='importance', ascending=False)
-    res = res[0:5]
     return res
 
 
@@ -59,6 +57,16 @@ def add_emails(df, nodes):
     nodes_df = pd.DataFrame.from_records([(x[0], x[1]['emails']) for x in nodes], columns=['url', 'emails'])
     df = df.merge(nodes_df, on='url', how='left')
     return df
+
+
+def filter_result(res):
+    res = res[~res['emails'].isna()]
+    mask = res['emails'].apply(lambda x: len(x)) > 0
+    res = res[mask]
+    res = res.sort_values(by='importance', ascending=False)
+    res = res[0:5]
+    res = res[0:5]
+    return res
 
 
 def save_result(df):
@@ -77,8 +85,9 @@ def graph_analyzer_manager(data):
     graph = create_graph(list_nodes, list_edges)
     importance_df = compute_importance_with_page_rank(graph=graph)
     importance_df_with_emails = add_emails(df=importance_df, nodes=list_nodes)
-    print(importance_df_with_emails)
-    save_result(importance_df_with_emails)
+    importance_df_with_emails_filtered = filter_result(importance_df_with_emails)
+    print(importance_df_with_emails_filtered)
+    save_result(importance_df_with_emails_filtered)
 
 
 if __name__ == '__main__':

@@ -20,6 +20,7 @@ class PageContentManyURLs:
         self.res = {}
 
     def get_one_page_content(self, url):
+        time.sleep(5)
         response = self.session.get(url)
         if 500 <= response.status_code < 600:  # server may be overload
             time.sleep(5)
