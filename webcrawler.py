@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
-import requests
 from requests import adapters as adapters
 from itertools import compress
+import requests
 import time
 import json
 import re
@@ -21,7 +21,7 @@ class PageContentManyURLs:
         self.res = {}
 
     def get_one_page_content(self, url):
-        time.sleep(5)
+        # time.sleep(5)
         response = self.session.get(url)
         if 500 <= response.status_code < 600:  # server may be overload
             time.sleep(5)
@@ -107,6 +107,9 @@ class WebCrawler:
         return list(unvisited_urls)
 
     def populate_db_n_layer(self):
+        """
+        Look for unique URLs and visit them.
+        """
         for i in range(0, self.num_layers):
             new_urls_to_visit = self.get_unvisited_urls()
             page_content_many_urls = PageContentManyURLs(urls=new_urls_to_visit)

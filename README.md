@@ -22,6 +22,3 @@ as direct-graph, while the page rank assume un-direct graph. Truth to be told
 I'm not sure if that's the best chose, though it's a good start. 
 
 The result are stored with CVS file, save on same folder of the script. 
-
-## Next Steps
-1. error handling where server's response is bad.

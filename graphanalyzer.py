@@ -1,6 +1,24 @@
+from urllib.parse import urlparse
 import networkx as nx
 import pandas as pd
 import json
+
+
+def extract_domain(url):
+    domain = urlparse(url).netloc
+    return domain
+
+
+def split_data_into_domains(data: dict):
+    data_domain_aware = {}
+    for url in data.keys():
+        domain = extract_domain(url)
+        if domain not in data_domain_aware.keys():
+            data_domain_aware[domain] = {}
+            data_domain_aware[domain][url] = data[url]
+        else:
+            data_domain_aware[domain][url] = data[url]
+    return data_domain_aware
 
 
 def extract_nodes_and_its_attribute(input_data: dict):
@@ -79,27 +97,31 @@ def upload_web_crawler_result():
     return web_crawler_result
 
 
+def create_analysis_per_domain(data):
+    list_df = []
+    for current_domain in data.keys():
+        domain_data = data[current_domain]
+        list_nodes = extract_nodes_and_its_attribute(input_data=domain_data)
+        list_edges = extract_edges(input_data=domain_data)
+        graph = create_graph(list_nodes, list_edges)
+        importance_df = compute_importance_with_page_rank(graph=graph)
+        importance_df['domain'] = current_domain
+        importance_df_with_emails = add_emails(df=importance_df, nodes=list_nodes)
+        importance_df_with_emails = filter_result(importance_df_with_emails)
+        importance_df_with_emails = importance_df_with_emails[['domain', 'url', 'importance', 'emails']]
+        list_df.append(importance_df_with_emails)
+    return list_df
+
+
 def graph_analyzer_manager(data):
-    list_nodes = extract_nodes_and_its_attribute(input_data=data)
-    list_edges = extract_edges(input_data=data)
-    graph = create_graph(list_nodes, list_edges)
-    importance_df = compute_importance_with_page_rank(graph=graph)
-    importance_df_with_emails = add_emails(df=importance_df, nodes=list_nodes)
-    importance_df_with_emails_filtered = filter_result(importance_df_with_emails)
-    print(importance_df_with_emails_filtered)
-    save_result(importance_df_with_emails_filtered)
+    data = split_data_into_domains(data)
+    list_df = create_analysis_per_domain(data)
+    df = pd.concat(list_df)
+    print(df)
+    save_result(df)
 
 
 if __name__ == '__main__':
-    # syntactic data example
-    input_syntactic_data_example = {
-        'url_1': {'emails': ['email_1.1', 'email_1.2'], 'list_urls': ['url_2', 'url_3']},
-        'url_2': {'emails': ['email_2.1'], 'list_urls': ['url_3']},
-        'url_3': {'emails': ['email_3.1'], 'list_urls': ['url_1']}
-    }
-    graph_analyzer_manager(data=input_syntactic_data_example)
-
-    # real example
     input_real_data_example = upload_web_crawler_result()
     graph_analyzer_manager(data=input_real_data_example)
 
